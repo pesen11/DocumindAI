@@ -19,9 +19,3 @@ anthropic==0.40.0
 numpy==1.26.4
 pydantic==2.10.3
 python-dotenv==1.0.1
-
-# ── Pin Rust-compiled packages to versions with pre-built wheels ───────────────
-# These must match what sentence-transformers + chromadb pull in.
-# Pre-built wheels exist for Python 3.12 at these versions.
-tokenizers==0.21.1
-pydantic-core==2.27.2
