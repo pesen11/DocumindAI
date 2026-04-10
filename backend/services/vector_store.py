@@ -22,13 +22,19 @@ logger = logging.getLogger(__name__)
 def _make_client() -> chromadb.ClientAPI:
     if os.getenv("CHROMA_USE_EPHEMERAL", "false").lower() == "true":
         # In-memory client — required for Streamlit Cloud (ephemeral filesystem)
-        return chromadb.EphemeralClient(
+        client = chromadb.EphemeralClient(
             settings=Settings(anonymized_telemetry=False),
         )
-    return chromadb.PersistentClient(
-        path=CHROMA_PERSIST_DIR,
-        settings=Settings(anonymized_telemetry=False),
-    )
+    else:
+        client = chromadb.PersistentClient(
+            path=CHROMA_PERSIST_DIR,
+            settings=Settings(anonymized_telemetry=False),
+        )
+    # Force SQLite schema migrations to run before any real operations.
+    # Without this, chromadb's lazy init can raise "no such table: collections"
+    # on the first actual call (especially on Streamlit Cloud).
+    client.list_collections()
+    return client
 
 
 class VectorStore:
