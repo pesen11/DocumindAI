@@ -1,0 +1,39 @@
+# Environment
+.env
+*.env
+
+# Streamlit secrets (contains API keys — never commit)
+.streamlit/secrets.toml
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+venv/
+.venv/
+env/
+
+# Vector DB (large binary files; exclude from git)
+chroma_db/
+
+# Test / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node (if React frontend added later)
+node_modules/
+frontend/dist/
+frontend/.next/

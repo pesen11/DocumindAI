@@ -1,0 +1,50 @@
+version: "3.9"
+
+services:
+  # ── FastAPI backend ─────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: documind-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - CHROMA_PERSIST_DIR=/app/chroma_db
+      - ALLOWED_ORIGINS=http://localhost:8501
+    volumes:
+      - chroma_data:/app/chroma_db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+  # ── Streamlit frontend ──────────────────────────────────────────────────────
+  frontend:
+    image: python:3.11-slim
+    container_name: documind-frontend
+    working_dir: /app
+    command: >
+      sh -c "pip install --no-cache-dir -r frontend/requirements.txt &&
+             streamlit run frontend/streamlit_app.py --server.port 8501 --server.address 0.0.0.0"
+    ports:
+      - "8501:8501"
+    environment:
+      - BACKEND_URL=http://backend:8000
+    volumes:
+      - ./frontend:/app/frontend
+      - ./.env:/app/.env
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  chroma_data:
+    name: documind_chroma
